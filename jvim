@@ -57,7 +57,7 @@ find_project_root() {
         done
         dir="$(dirname "$dir")"
     done
-    echo "$HOME"
+	echo "$(pwd)"
 }
 
 SEND_SIGNAL=true
