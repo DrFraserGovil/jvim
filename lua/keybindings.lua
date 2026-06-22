@@ -24,10 +24,17 @@ vim.keymap.set("n", "<leader>w", ":w<CR>")
 vim.keymap.set("n", "<leader>a", ":%y<CR>")
  
 -- Window  and buffer navigation
+require("functions/moveto")
 for i = 1, 9 do
 	vim.keymap.set("n", "<C-" .. i .. ">", i .. "<C-w>w", { desc = "Go to window " .. i })
 	vim.keymap.set("n", "<M-" .. i .. ">", "<Cmd>BufferLineGoToBuffer" .. i .. "<CR>", { desc = "Go to buffer " .. i })
+	vim.keymap.set("n","<leader>m" .. i, function()
+	moveBuffer(i)
+	end)
 end
+vim.keymap.set("n","<c-\\>",":vs<cr>:bp<cr><c-w>l")
 
-vim.keymap.set("n","<C-\\>",":vs<CR>:bp<CR><C-w>l")
- 
+-- comments
+vim.keymap.set("n", "<leader>q","<Esc>ihi")
+
+

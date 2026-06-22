@@ -2,7 +2,8 @@ require("remaps") 		-- move around basic vim keybindings to new keys
 require("keybindings")		-- add in new keybindings
 require("functions/localopen")  -- open files relative to the current file 
 require("functions/safeedit")	-- opens a buffer after moving to a non-terminal window
-
+require("functions/folding")	-- does better folding
+ 
 -- standard stuff
 vim.opt.ignorecase = false
 vim.opt.clipboard = "unnamedplus"
@@ -13,7 +14,14 @@ vim.opt.number = true --so that the current line is numbered
 vim.opt.wildmenu = true
 vim.opt.wildmode = "longest:full,full"
  
+-- folding
 
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevel = 99 -- Keeps files open by default
+vim.api.nvim_set_hl(0, "Folded", { bg = "NONE" })
+ 
+ 
 -- Highlight text on yank (copy)
 vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Briefly highlight yanked text",
@@ -25,7 +33,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
         })
     end,
 })
-
 
 vim.opt.shiftwidth=4
 vim.opt.tabstop=4

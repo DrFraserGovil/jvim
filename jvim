@@ -61,30 +61,35 @@ find_project_root() {
 }
 
 SEND_SIGNAL=true
-
 if [ ! -S "$SOCK" ]; then
 	if [ "$ROOT_SPECIFIED" = true ]; then
         cd_target="$ROOT_OVERRIDE"
     elif [ ${#args[@]} -gt 0 ]; then
         cd_target="$(find_project_root "${args[0]}")"
     else
-        cd_target="$HOME"
+		cd_target="$(pwd)"
     fi
+
 
 	if [ "$VERBOSE" = true ]; then
 		echo "Launching new neovide instance at socket" $SOCKET	
 		echo -e "\tProject root set to" $cd_target
 	fi
-
+	
 	if [ "$USING_NEOVIDE" = true ]; then
-		echo $args
 		nohup neovide.exe --wsl -- --cmd "cd $cd_target" --listen "$SOCK" >/dev/null 2>&1 &
-		#  
 		# wait for the server socket to come up (up to ~10s)
 		 for i in $(seq 1 50); do
 			 [ -S "$SOCK" ] && break
-        sleep 0.2
-    done
+			sleep 0.2
+			done
+		for i in $(seq 1 50); do
+            # vim.fn.exists(':SafeEdit') returns 2 if the user command is fully loaded
+            if nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.fn.exists(':SafeEdit')" 2>/dev/null | grep -q "2"; then
+                break
+            fi
+            sleep 0.1
+        done
 	else
 		nvim --cmd "cd $cd_target" \
 			--cmd "echo \"WARNING: Some keybindings may not function in terminal mode\"" \
@@ -103,7 +108,7 @@ if [ ${#args[@]} -gt 0 ] && [ $SEND_SIGNAL = "true" ]; then
 	for file in "${args[@]}"; do
         # 1. Force the server out of Terminal-Insert mode if it happens to be there
         # 2. Execute our custom safe edit command
-        nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd('SafeEdit $file')"	
+        nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd(\"SafeEdit $file\")"	
 		if [ "$VERBOSE" = true ]; then
 			 echo "$file" | awk -F/ '{out=""; for(i=1;i<NF;i++) if ($i!="") out=out"/"substr($i,1,1); print "\t" out"/"$NF}'
 		fi
