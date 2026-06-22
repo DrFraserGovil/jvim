@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+SOCK="/tmp/nvim-neovide-1.sock"
+PROJECT_MARKERS=(".git" "Makefile" "compile_commands.json" ".build")
+SOCKET=1
+ROOT_OVERRIDE=""
+ROOT_SPECIFIED=false
+VERBOSE=false
+USING_NEOVIDE=true
+args=()
+ 
+##### PROCESS ARGUMENTS
+while [ $# -gt 0 ]; do
+	if [[ "$1" == "-root" ]]; then
+		ROOT_SPECIFIED=true
+		
+		if [ -n "$2" ] && [ -d "$2" ]; then
+			ROOT_OVERRIDE="$(realpath -m "$2")"
+			shift 2
+		else
+			ROOT_OVERRIDE="$(pwd)"
+			shift 1 
+		fi
+	elif [[ "$1" =~ ^-([0-9]+)$ ]]; then
+        n="${BASH_REMATCH[1]}"
+		SOCKET=${n}
+		SOCK="/tmp/nvim-neovide-${n}.sock"
+		shift 1
+	elif [[ "$1" == "-v" ]]; then
+		VERBOSE=true
+		shift 1
+	elif [[ "$1" == "-t" ]]; then
+		USING_NEOVIDE=false
+		shift 1
+	else
+		resolved="$(realpath -m "$1")"
+		if [ -d "$resolved" ];then
+			ROOT_SPECIFIED=true
+			ROOT_OVERRIDE="$resolved"
+		else
+			args+=("$resolved")
+		fi
+		shift 1
+	fi
+done
+
+
+
+find_project_root() {
+    local dir
+    dir="$(dirname "$1")"
+    while [ "$dir" != "/" ]; do
+        for marker in "${PROJECT_MARKERS[@]}"; do
+            if [ -e "$dir/$marker" ]; then
+                echo "$dir"
+                return 0
+            fi
+        done
+        dir="$(dirname "$dir")"
+    done
+    echo "$HOME"
+}
+
+SEND_SIGNAL=true
+
+if [ ! -S "$SOCK" ]; then
+	if [ "$ROOT_SPECIFIED" = true ]; then
+        cd_target="$ROOT_OVERRIDE"
+    elif [ ${#args[@]} -gt 0 ]; then
+        cd_target="$(find_project_root "${args[0]}")"
+    else
+        cd_target="$HOME"
+    fi
+
+	if [ "$VERBOSE" = true ]; then
+		echo "Launching new neovide instance at socket" $SOCKET	
+		echo -e "\tProject root set to" $cd_target
+	fi
+
+	if [ "$USING_NEOVIDE" = true ]; then
+		nohup neovide.exe --wsl -- --cmd "cd $cd_target" --listen "$SOCK" >/dev/null 2>&1 &
+		# wait for the server socket to come up (up to ~10s)
+		for i in $(seq 1 50); do
+			[ -S "$SOCK" ] && break
+			sleep 0.2
+		done
+	else
+		nvim --cmd "cd $cd_target" \
+			--cmd "echo \"WARNING: Some keybindings may not function in terminal mode\"" \
+			--listen "$SOCK" \
+			"${args[@]}"
+		SEND_SIGNAL=false
+	fi
+		 
+fi
+
+if [ ${#args[@]} -gt 0 ] && [ $SEND_SIGNAL = "true" ]; then
+	if [ "$VERBOSE" = true ]; then
+		echo -e "nvim-"$SOCKET "opening:"
+	fi
+	 
+	for file in "${args[@]}"; do
+        # 1. Force the server out of Terminal-Insert mode if it happens to be there
+        # 2. Execute our custom safe edit command
+        nvim --headless --server "$SOCK" --remote-send "<C-\\><C-n>:SafeEdit $file<CR>"
+			
+		if [ "$VERBOSE" = true ]; then
+			 echo "$file" | awk -F/ '{out=""; for(i=1;i<NF;i++) if ($i!="") out=out"/"substr($i,1,1); print "\t" out"/"$NF}'
+		fi
+		nvim --headless --server "$SOCK" --remote-send ":filetype detect<CR>"
+    done
+fi
