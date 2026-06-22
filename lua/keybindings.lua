@@ -23,8 +23,11 @@ vim.keymap.set("n", "<leader>w", ":w<CR>")
 -- Whole document operations 
 vim.keymap.set("n", "<leader>a", ":%y<CR>")
  
--- Window navigation
+-- Window  and buffer navigation
 for i = 1, 9 do
-  vim.keymap.set("n", "<C-" .. i .. ">", i .. "<C-w>w", { desc = "Go to window " .. i })
+	vim.keymap.set("n", "<C-" .. i .. ">", i .. "<C-w>w", { desc = "Go to window " .. i })
+	vim.keymap.set("n", "<M-" .. i .. ">", "<Cmd>BufferLineGoToBuffer" .. i .. "<CR>", { desc = "Go to buffer " .. i })
 end
-vim.keymap.set("n","ZZ",":bn<cr>bd#<cr>")
+
+vim.keymap.set("n","<C-\\>",":vs<CR>:bp<CR><C-w>l")
+ 

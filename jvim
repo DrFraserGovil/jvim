@@ -77,12 +77,14 @@ if [ ! -S "$SOCK" ]; then
 	fi
 
 	if [ "$USING_NEOVIDE" = true ]; then
+		echo $args
 		nohup neovide.exe --wsl -- --cmd "cd $cd_target" --listen "$SOCK" >/dev/null 2>&1 &
+		#  
 		# wait for the server socket to come up (up to ~10s)
-		for i in $(seq 1 50); do
-			[ -S "$SOCK" ] && break
-			sleep 0.2
-		done
+		 for i in $(seq 1 50); do
+			 [ -S "$SOCK" ] && break
+        sleep 0.2
+    done
 	else
 		nvim --cmd "cd $cd_target" \
 			--cmd "echo \"WARNING: Some keybindings may not function in terminal mode\"" \
@@ -101,11 +103,10 @@ if [ ${#args[@]} -gt 0 ] && [ $SEND_SIGNAL = "true" ]; then
 	for file in "${args[@]}"; do
         # 1. Force the server out of Terminal-Insert mode if it happens to be there
         # 2. Execute our custom safe edit command
-        nvim --headless --server "$SOCK" --remote-send "<C-\\><C-n>:SafeEdit $file<CR>"
-			
+        nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd('SafeEdit $file')"	
 		if [ "$VERBOSE" = true ]; then
 			 echo "$file" | awk -F/ '{out=""; for(i=1;i<NF;i++) if ($i!="") out=out"/"substr($i,1,1); print "\t" out"/"$NF}'
 		fi
-		nvim --headless --server "$SOCK" --remote-send ":filetype detect<CR>"
+		nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd('filetype detect')"
     done
 fi
