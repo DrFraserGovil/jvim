@@ -35,3 +35,9 @@ vim.keymap.set("n", "`", ".")
 vim.keymap.set("n", ",", "'")
 vim.keymap.set("n", "'", ",")
 
+
+-- basic indent
+vim.keymap.set("n","<M-]>",">>")
+vim.keymap.set("n","<M-[>","<<")
+vim.keymap.set("v","<M-]>",">gv")
+vim.keymap.set("v","<M-[>","<gv")
