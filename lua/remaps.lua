@@ -1,6 +1,6 @@
 -- Escape remap
 vim.keymap.set("i", "jj", "<Esc>")
- 
+vim.keymap.set("i", "<C-space>",  "<Esc>")
 local directional_modes = { "n", "v", "o" }
 
 -- Remap HJKL to be powerful versions of hjkl

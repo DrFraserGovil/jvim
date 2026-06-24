@@ -71,6 +71,8 @@ vim.keymap.set("n", "<leader>d", function()
     -- 2. Trigger LSP code action and auto-apply if possible
     vim.lsp.buf.code_action({ apply = true })
 end, { desc = "Generate out-of-line definition" })
+
+vim.keymap.set("n","<leader><CR>","$o{<CR>}<ESC>O")
 -- zooming
 vim.g.neovide_scale_factor = 1.0
 

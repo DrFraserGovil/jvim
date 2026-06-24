@@ -1,4 +1,5 @@
 return {
+	
 
 	{
 		"onsails/lspkind.nvim",
@@ -67,7 +68,7 @@ vim.lsp.config("clangd", {
                     end,
                 },
                 mapping = cmp.mapping.preset.insert({
-                    ["<C-Space>"] = cmp.mapping.complete(),
+					["<C-Tab>"] = cmp.mapping.complete(),
                     ["<CR>"] = cmp.mapping.confirm({ select = true }),
                     ["<Tab>"] = cmp.mapping.confirm({ select = true }),
 					["<C-q>"] = cmp.mapping.abort()
