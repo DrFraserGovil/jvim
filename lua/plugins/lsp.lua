@@ -44,7 +44,6 @@ return {
 				},
 				mapping = cmp.mapping.preset.insert({
 					["<C-Tab>"] = cmp.mapping.complete(),
-					["<CR>"] = cmp.mapping.confirm({ select = true }),
 					["<Tab>"] = cmp.mapping.confirm({ select = true }),
 					["<C-q>"] = cmp.mapping.abort()
 				}),
@@ -94,21 +93,22 @@ return {
 							executable = 'jfglatex',
 							args = { '%f' },
 							onSave = true,
-							forwardSearchAfter = false,  -- nothing to forward-search to without synctex
+							forwardSearchAfter = false,
 						},
 						chktex = {
-							onOpenAndSay = true,
+							onOpenAndSave = true,
 							onEdit = false,
 						},
 						diagnosticsDelay = 300,
 						latexFormatter = 'latexindent',
 						formatterLineLength = 80,
-						-- forwardSearch block omitted entirely — no synctex, no destination to jump to
 					},
 				},
 			})
-
 			vim.lsp.enable('texlab')
+
+			-- Python
+			vim.lsp.enable('pyright')
 		end,
 	},
 

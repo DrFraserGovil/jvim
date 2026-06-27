@@ -7,12 +7,12 @@ ROOT_SPECIFIED=false
 VERBOSE=false
 USING_NEOVIDE=true
 args=()
- 
+
 ##### PROCESS ARGUMENTS
 while [ $# -gt 0 ]; do
 	if [[ "$1" == "-root" ]]; then
 		ROOT_SPECIFIED=true
-		
+
 		if [ -n "$2" ] && [ -d "$2" ]; then
 			ROOT_OVERRIDE="$(realpath -m "$2")"
 			shift 2
@@ -21,7 +21,7 @@ while [ $# -gt 0 ]; do
 			shift 1 
 		fi
 	elif [[ "$1" =~ ^-([0-9]+)$ ]]; then
-        n="${BASH_REMATCH[1]}"
+		n="${BASH_REMATCH[1]}"
 		SOCKET=${n}
 		SOCK="/tmp/nvim-neovide-${n}.sock"
 		shift 1
@@ -46,50 +46,53 @@ done
 
 
 find_project_root() {
-    local dir
-    dir="$(dirname "$1")"
-    while [ "$dir" != "/" ]; do
-        for marker in "${PROJECT_MARKERS[@]}"; do
-            if [ -e "$dir/$marker" ]; then
-                echo "$dir"
-                return 0
-            fi
-        done
-        dir="$(dirname "$dir")"
-    done
+	local dir
+	dir="$(dirname "$1")"
+	while [ "$dir" != "/" ]; do
+		for marker in "${PROJECT_MARKERS[@]}"; do
+			if [ -e "$dir/$marker" ]; then
+				echo "$dir"
+				return 0
+			fi
+		done
+		dir="$(dirname "$dir")"
+	done
 	echo "$(pwd)"
 }
 
 SEND_SIGNAL=true
 if [ ! -S "$SOCK" ]; then
 	if [ "$ROOT_SPECIFIED" = true ]; then
-        cd_target="$ROOT_OVERRIDE"
-    elif [ ${#args[@]} -gt 0 ]; then
-        cd_target="$(find_project_root "${args[0]}")"
-    else
+		cd_target="$ROOT_OVERRIDE"
+	elif [ ${#args[@]} -gt 0 ]; then
+		cd_target="$(find_project_root "${args[0]}")"
+	else
 		cd_target="$(pwd)"
-    fi
+	fi
 
 
 	if [ "$VERBOSE" = true ]; then
 		echo "Launching new neovide instance at socket" $SOCKET	
 		echo -e "\tProject root set to" $cd_target
 	fi
-	
+
 	if [ "$USING_NEOVIDE" = true ]; then
-		nohup neovide.exe --wsl -- --cmd "cd $cd_target" --listen "$SOCK" >/dev/null 2>&1 &
+		nohup neovide.exe --wsl -- --cmd "cd $cd_target" \
+			--cmd "let &titlestring = 'NV $SOCKET - %f'" \
+			--cmd "set title" \
+			--listen "$SOCK" >/dev/null 2>&1 &
 		# wait for the server socket to come up (up to ~10s)
-		 for i in $(seq 1 50); do
-			 [ -S "$SOCK" ] && break
-			sleep 0.2
-			done
 		for i in $(seq 1 50); do
-            # vim.fn.exists(':SafeEdit') returns 2 if the user command is fully loaded
-            if nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.fn.exists(':SafeEdit')" 2>/dev/null | grep -q "2"; then
-                break
-            fi
-            sleep 0.1
-        done
+			[ -S "$SOCK" ] && break
+			sleep 0.2
+		done
+		for i in $(seq 1 50); do
+			# vim.fn.exists(':SafeEdit') returns 2 if the user command is fully loaded
+			if nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.fn.exists(':SafeEdit')" 2>/dev/null | grep -q "2"; then
+				break
+			fi
+			sleep 0.1
+		done
 	else
 		nvim --cmd "cd $cd_target" \
 			--cmd "echo \"WARNING: Some keybindings may not function in terminal mode\"" \
@@ -97,21 +100,21 @@ if [ ! -S "$SOCK" ]; then
 			"${args[@]}"
 		SEND_SIGNAL=false
 	fi
-		 
+
 fi
 
 if [ ${#args[@]} -gt 0 ] && [ $SEND_SIGNAL = "true" ]; then
 	if [ "$VERBOSE" = true ]; then
 		echo -e "nvim-"$SOCKET "opening:"
 	fi
-	 
+
 	for file in "${args[@]}"; do
-        # 1. Force the server out of Terminal-Insert mode if it happens to be there
-        # 2. Execute our custom safe edit command
-        nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd(\"SafeEdit $file\")"	
+		# 1. Force the server out of Terminal-Insert mode if it happens to be there
+		# 2. Execute our custom safe edit command
+		nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd(\"SafeEdit $file\")"	
 		if [ "$VERBOSE" = true ]; then
-			 echo "$file" | awk -F/ '{out=""; for(i=1;i<NF;i++) if ($i!="") out=out"/"substr($i,1,1); print "\t" out"/"$NF}'
+			echo "$file" | awk -F/ '{out=""; for(i=1;i<NF;i++) if ($i!="") out=out"/"substr($i,1,1); print "\t" out"/"$NF}'
 		fi
 		nvim --headless --server "$SOCK" --remote-expr "v:lua.vim.cmd('filetype detect')"
-    done
+	done
 fi
