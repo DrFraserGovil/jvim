@@ -11,17 +11,35 @@ return {
 			local telescope = require("telescope")
 			local builtin = require('telescope.builtin')
 
-			-- Instead of requiring the utils at the very top, define the 
-			-- entry_maker function such that it requires the utils 
-			-- only when Telescope actually runs.
+			-- stolen from jesseleite on nvim-telescope #1048 as a workaround to select or or multiple files
+			local select_one_or_multi = function(prompt_bufnr)
+				local picker = require('telescope.actions.state').get_current_picker(prompt_bufnr)
+				local multi = picker:get_multi_selection()
+				if not vim.tbl_isempty(multi) then
+					require('telescope.actions').close(prompt_bufnr)
+					for _, j in pairs(multi) do
+						if j.path ~= nil then
+							vim.cmd(string.format('%s %s', 'edit', j.path))
+						end
+					end
+				else
+					require('telescope.actions').select_default(prompt_bufnr)
+				end
+			end
 
 			telescope.setup({
 				defaults = {
-					initial_mode = "normal",
 
 					mappings = {
-						i = { ["<C-Space>"] = function() vim.cmd("stopinsert") end, },
-						n = { ["<C-Space>"] = "close" },
+						i = {
+							["<C-Space>"] = function() vim.cmd("stopinsert") end, 
+							["<CR>"] = select_one_or_multi,
+						},
+						n = { 
+							["<C-Space>"] = "close",
+							["q"] = "close" ,
+							["<CR>"] = select_one_or_multi,
+						},
 					},
 				},
 			})

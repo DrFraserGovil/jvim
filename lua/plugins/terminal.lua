@@ -3,11 +3,11 @@ return {
 	version = "*",
 	config = function()
 		require("toggleterm").setup({
-			open_mapping = [[<C-'>]],
+			open_mapping = [[<C-@>]],
 		})
 
 		-- Jump TO the terminal and guarantee Terminal-Insert mode
-		vim.keymap.set("n", "<C-CR>", function()
+		vim.keymap.set("n", "<C-'>", function()
 			for _, win in ipairs(vim.api.nvim_list_wins()) do
 				local buf = vim.api.nvim_win_get_buf(win)
 				if vim.bo[buf].filetype == "toggleterm" then
@@ -23,7 +23,7 @@ return {
 		end, { noremap = true, silent = true })
 
 		-- Jump AWAY from the terminal back to your editor window
-		vim.keymap.set("t", "<C-CR>", function()
+		vim.keymap.set("t", "<C-'>", function()
 			vim.cmd("stopinsert")
 			vim.cmd("wincmd p")
 		end

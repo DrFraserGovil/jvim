@@ -29,16 +29,21 @@ vim.keymap.set("n", "<leader>w", ":w<CR>")
 vim.keymap.set("n","ZZ", ":w<CR>:Bdelete<CR>") 
 
 -- Whole document operations 
-vim.keymap.set("n", "<leader>a", ":%y<CR>")
+vim.keymap.set("n", "<leader>y", ":%y<CR>")
+vim.keymap.set("n", "<leader>a", "ggVG")
 vim.keymap.set("n", "<leader>n", ":noh<CR>") 
-vim.keymap.set("n", "<leader>=", "mhggVG==<Esc>`h") --triggers a global reformat
+vim.keymap.set("n", "<leader>=", function() vim.lsp.buf.format({async=true}) end) --triggers a global reformat
 
+local toggle = require("functions/togglewrap")
+vim.keymap.set("n", "<M-z>",toggle.togglewrap)
 
 -- Window  and buffer navigation
 require("functions/moveto")
 for i = 1, 9 do
 	vim.keymap.set("n", "<C-" .. i .. ">", i .. "<C-w>w", { desc = "Go to window " .. i })
 	vim.keymap.set("n", "<M-" .. i .. ">", "<Cmd>BufferLineGoToBuffer" .. i .. "<CR>", { desc = "Go to buffer " .. i })
+	vim.keymap.set("n", "<M-" .. i .. ">", function() require("bufferline").go_to(i, true) end, { desc = "Go to buffer " .. i })
+	
 	vim.keymap.set("n","<leader>m" .. i, function()
 		moveBuffer(i)
 	end)
@@ -47,13 +52,20 @@ vim.keymap.set("n","ge",":bn<CR>")
 vim.keymap.set("n","gE",":bp<CR>")
 
 -- Split window
-vim.keymap.set("n","<c-\\>",":vs<cr>:bp<cr><c-w>l",{desc= "Split window vertically without duplicating the buffer")
+vim.keymap.set("n","<c-\\>",":vs<cr>:bp<cr><c-w>l",{desc= "Split window vertically without duplicating the buffer"})
 
 
---Comments
+--Comments & folding
 vim.keymap.set("n","<C-/>","gcc",{remap=true})
 vim.keymap.set("v","<C-/>","gcgv",{remap=true})
-
+for i = 1, 9 do
+    vim.keymap.set('n', '<leader>f' .. i, function()
+        vim.cmd('normal! zM' .. i .. 'zr')
+        print("Fold level set to " .. i)
+    end, { desc = "Collapse to exactly fold level " .. i })
+end
+ 
+ 
 -- LSP
 vim.keymap.set("n", "Q", function() vim.lsp.buf.hover() end, { desc = "Show LSP hover" })
 vim.keymap.set("n","<C-e>",vim.diagnostic.open_float, {desc = "Show diagnostic float"})

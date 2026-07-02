@@ -80,6 +80,7 @@ if [ ! -S "$SOCK" ]; then
 		nohup neovide.exe --wsl -- --cmd "cd $cd_target" \
 			--cmd "let &titlestring = 'NV $SOCKET - %f'" \
 			--cmd "set title" \
+			 -c "if filereadable('.jvim.session') | source .jvim.session | endif" \
 			--listen "$SOCK" >/dev/null 2>&1 &
 		# wait for the server socket to come up (up to ~10s)
 		for i in $(seq 1 50); do

@@ -41,3 +41,11 @@ vim.keymap.set("n","<M-]>",">>")
 vim.keymap.set("n","<M-[>","<<")
 vim.keymap.set("v","<M-]>",">gv")
 vim.keymap.set("v","<M-[>","<gv")
+
+-- change the tabs
+vim.cmd("cabbrev ret retab!")
+vim.cmd("cabbrev ret! retab")
+
+-- set insert mode ctrl-v
+vim.keymap.set("i","<C-v>","<Esc>pa")
+vim.keymap.set("i","<C-x>","<C-v>")
