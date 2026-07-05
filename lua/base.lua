@@ -5,7 +5,11 @@ require("functions/safeedit")	-- opens a buffer after moving to a non-terminal w
 require("functions/todo")	-- streamline dinterface for todo
 require("functions/definesource")	
 require("functions/sessions")
-
+require("functions/moveline")
+require("functions/harpoontabs")
+require("functions/harpoon")
+require("functions/clearbuffers")
+require("functions/treesitter")
 -- env sourcing
 vim.env.VIRTUAL_ENV = vim.fn.expand("~/pysphere")
 vim.env.PATH = vim.env.VIRTUAL_ENV .. "/bin:" .. vim.env.PATH
@@ -65,4 +69,5 @@ vim.api.nvim_create_autocmd("TextYankPost", {
         })
     end,
 })
+
 

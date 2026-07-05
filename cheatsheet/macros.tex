@@ -1,0 +1,420 @@
+\def\w{0.12}
+\def\ks{2.07}
+\def\downset{0.5}
+\newcounter{x}
+\newcounter{y}
+\setcounter{y}{0}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\NewDocumentCommand\Row{m}
+{
+	\setcounter{x}{0}
+	\stepcounter{y}
+	\def\offset{0.3+#1}
+	
+}
+\definecolor{motion}{RGB}{127,227,150}
+\definecolor{command}{RGB}{227,227,50}
+\definecolor{operator}{RGB}{127,127,250}
+\definecolor{misc}{RGB}{187,187,187}
+\NewDocumentCommand\BiKey{o m m m m m o}
+{
+	\coordinate (tl) at ({\offset + \thex*(\ks+\w)},{21.3-(\they-1)*(\ks + \w)  - \downset});
+	\coordinate (tr) at ($(tl) + (\ks,0)$);
+	\coordinate (bl) at ($(tl) + (0,-\ks)$);
+	\coordinate (br) at ($(tr) + (0,-\ks)$);
+
+	\coordinate (ml) at ($(tl) + (0,-0.5*\ks)$);
+	\coordinate (mr) at ($(ml) + (\ks,0)$);
+
+
+	%create the box itself
+	\def\ucol{#3}\def\lcol{#4}
+	\fill[\ucol] (tl) rectangle (mr);
+	\fill[\lcol] (ml) rectangle (br);
+	\IfNoValueTF{#7}
+	{
+		\draw (tl) rectangle (br);
+	}{
+		% 0 - top custom 
+		% 1 - bottom custom 
+		% 2 - both
+		
+		\if0#7
+			\draw[dashed] ($(tl)+(0,-\ks/2)$)--(tl)--(tr)--($(tr)+(0,-\ks/2)$)--cycle;
+			\draw[] ($(tl)+(0,-\ks/2)$)--(bl)--(br)--($(br)+(0,+\ks/2)$);
+		\else
+			\if1#7
+				\draw ($(tl)+(0,-\ks/2)$)--(tl)--(tr)--($(tr)+(0,-\ks/2)$);
+				\draw[dashed] ($(tl)+(0,-\ks/2)$)--(bl)--(br)--($(br)+(0,+\ks/2)$)--cycle;
+			\else
+				\if#72
+					\draw[dashed] (tl) rectangle (br);
+				\fi
+			\fi
+		\fi
+	}
+	 
+	%lower case label
+	\node[anchor = south west] at (bl) {\parbox[t]{1cm}{\LARGE\bf \tt #2}}; 
+	\node[anchor = south east,inner xsep = 0.5pt] at (br) {\parbox[t]{1.4cm}{\raggedleft\scriptsize #6}};
+	
+	\IfNoValueTF{#1}
+	{
+		\node[anchor = north west] at (tl) {\parbox[t]{1cm}{\LARGE\bf \tt \uppercase{#2}}};
+	}
+	{
+		\node[anchor = north west] at (tl) {\parbox[t]{1cm}{\LARGE\bf \tt #1}};
+	}
+	\node[anchor = north east,inner xsep = 0.5pt] at (tr) {\parbox[t]{1.4cm}{\raggedleft\scriptsize #5}};
+	\stepcounter{x}
+}
+
+\NewDocumentCommand{\Key}{o m m m m o}
+{
+	\BiKey[#1]{#2}{#3}{#3}{#4}{#5}[#6]
+}
+
+\def\lw{5}
+\def\lh{1}
+\def\bw{1}
+\NewDocumentCommand{\OutsideLegend}{m m m }
+{
+	\coordinate (c) at ({ 3.3},{20.1 - (#3)*\lh});
+
+	\node[anchor= west,text width=1.4cm,draw,#1] at (c) {\parbox[t]{1.4cm}{\centering #1}};
+	\node[anchor= west] at ($(c) + (1.7,0)$) {\footnotesize \parbox[t]{5cm}{\raggedright #2}};
+
+}
+\NewDocumentCommand{\Legend}{m m m m}
+{
+	\coordinate (c) at ({(#2)*\lw + 19.3},{20.1 - (#3)*\lh});
+
+	\node[fill=#1,anchor= west,text width=1.4cm] at (c) {\parbox[t]{1.4cm}{\centering #1}};
+	\node[anchor=west ] at ($(c) + (1.7,0)$) {\footnotesize \parbox[t]{3cm}{\raggedright #4}};
+
+}
+\def\red{\color{red}}
+\def\char{$\star$}
+\NewDocumentCommand{\keyBoard}{}
+{
+	%right hand side
+	\Legend{motion}{0}{0}{moves cursor or define operator range}
+	\Legend{command}{0}{1}{immediate action. {\red{}red} are left in insert mode.}
+	\Legend{operator}{1}{0}{core operator; requires a range}
+	\Legend{misc}{1}{1}{numerics \& menu-opts}
+
+	%left hand side
+	\OutsideLegend{solid}{Standard vim command (mapped to modified UK keyboard layout)}{0}
+	\OutsideLegend{dashed}{Custom remapping}{1}
+
+	%main keyboard
+	\Row{0}
+	\Key[Esc]{}{motion}{}{normal mode}
+	\Row{0}
+	\BiKey[$\boldsymbol{\sim}$]{\`{}}{command}{motion}{toggle case}{repeat last command}[1]
+	\BiKey[!]{1}{operator}{misc}{external filter}{}
+	\Key["\char]{2}{misc}{activate registry \char}{}
+	\BiKey[£]{3}{motion}{misc}{prev. occurence}{}[0 ]
+	\BiKey[\$]{4}{command}{misc}{toggle code folding}{}[0]
+	\BiKey[\%]{5}{motion}{misc}{hop group}{}
+	\BiKey[$\boldsymbol{\wedge}$]{6}{command}{misc}{Unfold all}{}[0]
+	\BiKey[\&]{7}{command}{misc}{repeat last `:s'}{}
+	\BiKey[$\boldsymbol{*}$]{8}{motion}{misc}{next occurence}{}
+	\BiKey[(]{9}{motion}{misc}{next sentence}{}
+	\Key[)]{0}{motion}{prev. sentence}{start of line (hard)}
+	\BiKey[\underline{~~}\textcolor{\ucol}{(}]{-}{command}{motion}{Fold all}{start of prev. line}[0]%a bit hacky to make the underscore block take up vertical space
+
+	\BiKey[+]{=}{motion}{command}{start of next line}{auto format}
+
+	\Row{2.5}
+	\BiKey[Q]{q\char}{command}{command}{show tooltip}{record macro \char}[0]
+	\Key{w}{motion}{next WORD}{next word}
+	\Key{e}{motion}{end of WORD}{end of word}
+	\Key[\red{} R]{r\char}{command}{`replace' (insert) mode)}{replace with \char}
+	\Key{t\char}{motion}{move \\ back `til \char }{move \\`til \char}
+	\BiKey{y}{command}{operator}{yank line \\ (\texttt{yy})}{yank (copy)}
+	\Key{u}{command}{redo}{undo}[0]
+	\Key{\red i}{command}{insert at linestart (soft)}{insert (before) here}
+	\Key{\red o}{command}{open line above}{open line below}
+	\Key{p}{command}{paste before}{paste after}
+	\Key[\{]{[\char}{motion}{prev. paragraph}{prev. \char-context}
+	\Key[\}]{]\char}{motion}{next paragaph}{next \char-context}
+	
+
+
+	\Row{3.0}
+	\Key{\red a}{command}{append at line end}{append (after) here}
+	\Key{\red{}s}{command}{clear line}{delete character}
+	\BiKey{d}{command}{operator}{delete to line end \\ (\texttt{dL})}{delete \\ (and cut)}
+	\Key{f\char}{motion}{find \\ prev. \char}{find (move to) \char}
+	\BiKey[\char G]{g}{motion}{misc}{move to line \char~(eof if none).}{multikey prefix}
+	 \Key{h}{motion}{start of line (soft)}{\huge $\leftarrow$}[0]
+	 \BiKey{j}{motion}{motion}{bottom of screen}{\huge $\downarrow$}[0]
+	 \BiKey{k}{motion}{motion}{top of screen}{\huge $\uparrow$}[0]
+	\Key{l}{motion}{end of line (soft)}{\huge $\rightarrow$}[0]
+	\BiKey[:]{;}{command}{motion}{enter cmd mode}{repeat last f, F, t or T}
+	\BiKey[\makeatletter@\makeatother\char]{'\textcolor{\lcol}{)}}{command}{motion}{activate macro \char}{reverse last f, F, t or T}[1]
+	\BiKey[$\boldsymbol{\vert}$]{\textbackslash}{motion}{motion}{start of line (hard)}{end of line (hard)}[1]
+
+	\Row{1.5}
+	\BiKey[$\boldsymbol{\sim}$]{\#}{command}{motion}{toggle case}{prev. occurence}
+	\BiKey[Z \\ \normalsize ($\times 2$)]{z}{command}{misc}{save \& quit}{multikey prefix}
+	\Key{x}{command}{backspace}{delete}
+	\BiKey{\red{} c}{command}{operator}{Change to line end \\ (\texttt{cL})}{change}
+	\Key{v}{command}{visual-line mode}{visual mode}
+	\Key{b}{motion}{prev. WORD}{prev. word}
+	\Key{n}{motion}{prev. search result}{next search result}
+	\BiKey[M]{m\char}{motion}{command}{mid-screen}{mark location \\ as \char}
+	\BiKey[$\boldsymbol{<}$]{,\char}{operator}{motion}{de-indent}{jump to mark \char \\ (linestart)}[1]
+	\BiKey[$\boldsymbol{>}$]{.\char}{operator}{command}{indent}{jump to mark \char \\ (exact)}
+	\Key[?]{/}{motion}{search (back)}{search (forward)}
+}
+
+\def\navigatrix{
+	\coordinate (c) at (5,5);
+	\def\wb{0.5}
+	\def\L{4.5}
+	\foreach \theta/\set in {
+		0/{l/{next char}, e/{next word end}, w/{next word start},{\small)}/{sentence end},L/{end line}},
+		90/{k/{up line},<C-u>/{1/2 up},K/{scroll top}, {\small \{}/{para start}, {gg}/{first line}},     
+		180/{h/{prev. char}, b/{prev. word start},  {\small(}/{sentence start}, H/{first char.},$\vert$/{start line}},
+		270/{j/{down line}, <C-d>/{1/2 down}, J/{screen bottom}, {\small\}}/{para end}, G/{last line}}}
+	{
+		\def\col{gray!40!red!50!white}
+		\def\col{green!50!black}
+		\fill[fill=\col,rotate=\theta] (c) + (0,\wb) rectangle ++(\L,-\wb)--++(0,-\wb)--++(\wb,2*\wb)--++(-\wb,2*\wb)--++(0,-\wb);
+		\foreach[count= \c] \char/\desc in \set
+		{
+			\def\r{0.85}
+			\node[anchor=north,color=white] at ($(c) + ({\c*\r*cos(\theta)},{\c*\r*sin(\theta) +\wb})$) {\parbox[t]{1cm}{\centering \tt \char}};
+			\node[anchor=north,color=white] at ($(c) + ({\c*\r*cos(\theta)},{\c*\r*sin(\theta) +\wb-0.35})$) {\parbox[t]{0.8cm}{\centering \tiny \desc}};
+		}
+	}
+	% \node at (c) {\small Movement};
+}
+\newcommand\element[2]{
+	\maxsizebox{\elWidth}{!}{\texttt{#1}} & #2 \\
+}
+\NewDocumentCommand{\tab}{o m}
+{
+	\IfNoValueTF{#1}{\def\elWidth{1.2cm}}{\def\elWidth{#1}}
+	\begin{tabularx}{\linewidth}{lX}
+		#2
+	\end{tabularx}
+}
+\def\words
+{
+	\node[anchor = north] at (2.3,9.5) {
+		\begin{minipage}{4.1cm}{\small \centering \bf Words \& WORDS \par}
+			\scriptsize
+			
+			\tab{
+				\element{word}{a block of alphanumeric characters and underscores}
+				\element{WORD}{a block of \textbf{any} non whitespace characters}
+				\element{sentence}{any block of symbols ending in '.', '!' or '?', followed by whitespace. }
+				\element{paragraph}{any text between blank lines}
+			}
+		\end{minipage}};
+}
+
+\def\search
+{
+	\node[anchor = north] at (2.3,4.2) {
+	\begin{minipage}{4.1cm}
+        {\bf\centering \small  {Search \& Substitute}\par }
+		
+		\scriptsize 
+		
+		\tab{
+			\element{/[regexp]}{search forward}
+			\element{?[regexp]}{search backward}
+			\element{n/N}{Cycle through search results}
+			\element{:s/old/new}{Replace first \texttt{old} on line with \texttt{new}}
+			\element{:s/old/new/g}{Replace all instances on line}
+			\element{:\%s/old/new/g}{Replace all instances in file}
+		}
+    \end{minipage}
+};}
+
+\def\grammar
+{
+	\node[fill=operator!90!white,anchor = north west] at (5.6,9.7){
+		\begin{minipage}{10cm}
+			
+        {\bf\centering \normalsize  {Operators \& Ranges}\par }
+		
+		\scriptsize 
+		
+		Operators perform an action on \textbf{range}, which is defined by an (optional) count and a motion.
+		$$ \text{\texttt{cmd} = [operator] \textcolor{gray}{[count (1)]} [motion]}$$
+		The operator action is performed on all characters between the current cursor location and the location defined by (count)$\times$(motion). 
+		
+		
+			{\bf  \small {The Operators}\par}
+			
+			\tab[1.6cm]
+			{
+				\element{y (yank)}{Copy region to registry}
+				\element{d (delete)}{Copy region to registry and delete the region}
+				\element{c (change)}{Copy region to registry, delete the region, and enter insert mode}
+				\element{</> (indent)}{Decrease/Increase the indent level of the region}
+				\element{gu/gU}{Change region to lower/upper case text}
+			}
+
+		\begin{minipage}[t]{4cm}
+			\phantom{This text is invisible but holds the space.}
+		\end{minipage}%
+		\begin{minipage}[t]{6cm} %some hacky manual spacing to go around the navigatrix
+			\phantom{i} If no count is specified, the motion is performed \\ \phantom{a}~once. Counts may preceed the operator; 5yy \\ \phantom{i}~~~and y5y are equivalent. 
+			
+			\phantom{a}~Repeating the operator command applies it to \\ \phantom{i} the entire current line (\texttt{dd} deletes the entire line)
+		\end{minipage}
+
+
+		{\bf  \small {Operator Grammar }\par}
+		
+		Operator-motions work like navigation:: \texttt{yW} yanks everything until the end of the current WORD, and \texttt{ctj} changes all text up to (but not including) the first `j'.  There are also two special `adverbs' which can be used after operators: \texttt{a} and \texttt{i}.
+
+		Some keys keep their meaning (\texttt{iw} is `inside the current word'), but others change drastically:
+
+		\vspace{0.05cm}
+
+		\begin{minipage}[t]{5cm}
+			
+		\tab{
+				\element{a\char}{`Around': All text specified by \char including the delimiters: \texttt{daw} deletes the current word, and the surrounding whitespace.}
+				\element{i\char }{`Inside': As with \texttt{a}, but only the contents; \texttt{diw} would delete only the word.}
+				\element{s\char}{Activates \href{https://github.com/tpope/vim-surround}{surround} extension. }
+				}
+			\end{minipage}~\begin{minipage}[t]{5cm}
+				\tab{
+					\element{s}{Current Sentence}
+					\element{p}{Current Paragraph}
+					\element{(, )}{Parenthesis group}
+					\element{\{, \}}{Brace group}
+					\element{[,]}{Bracket group}
+					\element{<,>}{Chevron group}
+					\element{t}{Tag group}
+					\element{",'}{Quoted string}
+				}
+				% \vspace{0.2cm}
+			\end{minipage}
+
+		\end{minipage}
+
+	};
+}
+
+\newcommand\f[1]
+{
+	\textsuperscript{[#1]}
+}
+\def\commandMode
+{
+	\node[anchor=north west,fill=command!80!white] at (16,9.7)
+	{
+		\begin{minipage}{7cm}
+		{\bf\centering \normalsize Command Mode \par}
+		
+			\footnotesize
+			Typing `:' enters command mode. \texttt{<Enter>} executes the command. 
+		
+			{\bf \small Files \& Focus  }
+			
+			\tab[2cm]{
+				\element{:w [name]}{Save [as \texttt{name}]}
+				\element{:q[!]}{Close [without saving]}
+				\element{:sp / :vsp}{Split window [vertically] }
+				\element{:b [file]}{Focus on \texttt{file}\f{1}}
+				\element{:bn / :bp}{Focus on next/previous file in group}
+				\element{:bd [file]}{Close \texttt{file}\f{1}}
+				\element{:e [file]}{Open [file]. Creates new file if no path provided }
+				\element{:only}{Close all open groups except current}
+				\element{:term}{Focus to terminal}
+				}
+				
+			{\bf \small Ranges \& Navigation}
+			
+			Can apply normal mode operators to these ranges; \texttt{:42d} deletes line 42, without needing to navigate there.
+			 \tab[2cm]{
+				\element{:\%}{Whole file}
+				\element{:[a]}{Select/Jump to line a (equivalent to \texttt{[a]G})}
+				\element{:[a],[b]}{Range from line a to b}
+				\element{:`<,`>}{Current \texttt{visual mode} selection}
+			 }
+			{\bf \small Utilities}
+
+			\tab[2cm]{
+				\element{:s}{Search \& Substitute (see bottom left)}
+				\element{:noh}{Clears search highlights}
+				\element{:ret}{Replaces spaces with tabs}
+				\element{:sort [u]}{Sort selection [and remove duplicates]}
+				\element{:reg}{Show contents of registers}
+			}	
+			\scriptsize
+			\f{1} Does nothing if target not in current group
+
+			\vspace{-0.03cm}
+		\end{minipage}
+	};
+}
+\def\Multichar
+{
+	\node[anchor=north east,fill=misc!90!white] (multi) at (29.6,9.7)
+	{
+		\begin{minipage}{6cm}
+			{\bf\centering \normalsize Multi-character Commands \par}
+		
+			\scriptsize
+			{\bf \small The `z' key}
+
+			\tab[2cm]
+			{
+				\element{za}{Toggle fold}
+				\element{zM/zR}{Fold all / Unfold all}
+   				\element{zt/zz/zb}{Scroll until cursor is at top / middle / bottom of screen}
+			}
+
+			{\bf \small The `g' key}
+
+			\tab[2cm]
+			{
+				\element{gg}{Motion: First line}
+				\element{gd}{Go to definition}
+   				\element{gu/gU}{Operator: make range upper/lower case}
+				\element{gf}{Open file under cursor}
+			}
+
+			{\bf \small Ctrl-pairs}
+
+			\tab[2cm]
+			{
+				\element{C-a/C-x}{Incremenet/decrement numerical value under cursor}
+				\element{C-o/C-i}{Go to previous/next position in jump history}
+			}
+		\end{minipage}
+	};
+}
+
+\def\register
+{
+	\node[fill = red!30!white,anchor=north] at ($(multi.south) + (0,-0.05)$) {
+		\begin{minipage}{6cm}
+			{\bf\centering \normalsize Registers\par}
+		
+			\scriptsize \texttt{d, y} and \texttt{p} transfer text into a \textbf{register}. If none is specified, \texttt{""} is used, otherwise commands can use a specific register; \texttt{"ayy} yanks to the \texttt{a} register, and \texttt{"ap} would then paste it. 
+
+			Some registers are assigned automatically:
+			\tab{
+				\element{"/}{Last search}
+				\element{"0}{Last yank}
+				\element{"1-"9}{Delete carousel ("1 is most recent delete, "2 second most recent, etc.)}
+				\element{"+}{System clipboard (mapped to "" by default)}
+			}
+
+			Macros occupy the same registry space as \texttt{dyp}. Marks occupy a different registry space, with \texttt{a-z} local to the file, \texttt{A-Z} shared globally.
+			\vspace{-0.12cm}
+		\end{minipage}
+	};
+}

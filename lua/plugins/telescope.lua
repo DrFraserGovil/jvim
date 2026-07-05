@@ -29,7 +29,7 @@ return {
 
 			telescope.setup({
 				defaults = {
-
+					initial_mode = "insert",
 					mappings = {
 						i = {
 							["<C-Space>"] = function() vim.cmd("stopinsert") end, 
@@ -39,15 +39,21 @@ return {
 							["<C-Space>"] = "close",
 							["q"] = "close" ,
 							["<CR>"] = select_one_or_multi,
+							['<c-d>'] = require('telescope.actions').delete_buffer,
 						},
 					},
 				},
+				pickers = {
+						buffers = { initial_mode = "normal",sort_mru= true,ignore_current_buffer=true},
+						git_status = { initial_mode = "normal"},
+				}
 			})
 
 			-- Keymaps
 			vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
 			vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
-			vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
+			vim.keymap.set('n', '<leader>b', builtin.buffers, { desc = 'Telescope buffers' })
+			vim.keymap.set('n', '<leader>g', builtin.git_status, { desc = 'Telescope buffers' })
 			vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
 
 		end,    },

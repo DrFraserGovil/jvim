@@ -86,14 +86,14 @@ return {
 
 			-- LATEX
 			vim.lsp.config('texlab', {
-				 on_attach = function(client, bufnr)
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = bufnr,
-      callback = function()
-        vim.lsp.buf.format({ bufnr = bufnr, id = client.id })
-      end,
-    })
-  end,
+				on_attach = function(client, bufnr)
+					vim.api.nvim_create_autocmd("BufWritePre", {
+						buffer = bufnr,
+						callback = function()
+							vim.lsp.buf.format({ bufnr = bufnr, id = client.id })
+						end,
+					})
+				end,
 				settings = {
 					texlab = {
 						auxDirectory = ".build",
@@ -117,6 +117,21 @@ return {
 
 			-- Python
 			vim.lsp.enable('pyright')
+			-- Sphinx/rst
+			vim.lsp.config('esbonio', {
+				cmd = { vim.fn.stdpath('data') .. "/mason/bin/esbonio", "server" },
+				filetypes = { 'rst' },
+				root_markers = { 'conf.py', 'Makefile', 'make.bat' },
+				settings = {
+					esbonio = {
+						sphinx = {
+							pythonCommand = { "/home/jfg/pysphere/bin/python3" },
+							buildCommand = { "sphinx-build", "-M", "html", ".", "_build" },
+						}
+					}
+				}
+			})
+			vim.lsp.enable('esbonio')
 		end,
 	},
 
