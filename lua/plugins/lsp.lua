@@ -110,6 +110,9 @@ return {
 						diagnosticsDelay = 300,
 						latexFormatter = 'latexindent',
 						formatterLineLength = 80,
+						experimental = {
+								mathEnvironments = {"spalign"},
+						},
 					},
 				},
 			})
