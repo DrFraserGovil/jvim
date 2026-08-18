@@ -3,6 +3,10 @@ local directional_modes = { "n", "v", "o" }
 	vim.keymap.set("n", "<leader>j", "J")
 	vim.keymap.set("n", "<leader>k", "i<CR><Esc>k$")
 
+-- Mode fixes
+	vim.keymap.set("v","i","I")
+	vim.keymap.set("i", "<Space>","<Space><C-g>u",{noremap=true})
+
 -- Insert lines, keeping indent
 	vim.keymap.set('n', '<CR>', 'o<Space><Esc>', { noremap = true })
 	vim.keymap.set('n', '<S-CR>', 'O<Space><Esc>', { noremap = true })
@@ -41,6 +45,7 @@ local directional_modes = { "n", "v", "o" }
 	require("functions/moveto")
 	for i = 1, 9 do
 		vim.keymap.set("n", "<C-" .. i .. ">", i .. "<C-w>w", { desc = "Go to window " .. i })
+		vim.keymap.set("i", "<C-" .. i .. ">", "<Esc>" .. i .. "<C-w>w", { desc = "Go to window " .. i })
 		vim.keymap.set("n","<leader>m" .. i, function() moveBuffer(i) end)
 	end
 	vim.keymap.set("n","ge",":bn<CR>")
@@ -53,6 +58,7 @@ local directional_modes = { "n", "v", "o" }
 
 
 --Comments & folding
+	vim.keymap.set("i","<C-/>","<Esc>gcc]",{remap=true})
 	vim.keymap.set("n","<C-/>","gcc",{remap=true})
 	vim.keymap.set("v","<C-/>","gcgv",{remap=true})
 	for i = 1, 9 do
