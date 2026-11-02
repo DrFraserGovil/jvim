@@ -31,10 +31,3 @@ require("lazy").setup({
 if vim.g.vscode then
 	require("vscode-hooks")
 end
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "qf",
-    callback = function()
-        -- Restores the default 'jump' behavior for Enter in the quickfix window
-        vim.keymap.set("n", "<CR>", "<CR>", { buffer = true })
-    end,
-})

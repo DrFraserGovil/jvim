@@ -4,14 +4,29 @@ local directional_modes = { "n", "v", "o" }
 	vim.keymap.set("n", "<leader>k", "i<CR><Esc>k$")
 
 -- Mode fixes
-	vim.keymap.set("v","i","I")
 	vim.keymap.set("i", "<Space>","<Space><C-g>u",{noremap=true})
 
--- Insert lines, keeping indent
-	vim.keymap.set('n', '<CR>', 'o<Space><Esc>', { noremap = true })
-	vim.keymap.set('n', '<S-CR>', 'O<Space><Esc>', { noremap = true })
-	vim.keymap.set('v', '<CR>', '<Esc>o<Space><Esc>gv', { noremap = true })
-	vim.keymap.set('v', '<S-CR>', '<Esc>O<Space><Esc>gv', { noremap = true })
+-- Insert lines: truly empty (no trailing whitespace); the indent is applied when you start typing (below)
+	-- special buffers (quickfix, q:, etc.) keep their own <CR>
+	local function open_line(key)
+		return function()
+			if vim.bo.buftype ~= "" then return "<CR>" end
+			return key .. "<Esc>"
+		end
+	end
+	vim.keymap.set("n", "<CR>",   open_line("o"), { expr = true })
+	vim.keymap.set("n", "<S-CR>", open_line("O"), { expr = true })
+	vim.keymap.set("v", "<CR>",   "<Esc>o<Esc>gv")
+	vim.keymap.set("v", "<S-CR>", "<Esc>O<Esc>gv")
+
+-- On a blank line, i/a/A start inserting at the correct indent rather than column 0
+	-- "_ keeps the cleared line out of the clipboard; a count (3i...) falls through to the normal key
+	for _, key in ipairs({ "i", "a", "A" }) do
+		vim.keymap.set("n", key, function()
+			if vim.v.count == 0 and vim.api.nvim_get_current_line():match("^%s*$") then return '"_cc' end
+			return key
+		end, { expr = true })
+	end
 
 -- Move lines 
 	vim.keymap.set("n", "<M-j>", ":m .+1<CR>==") -- Move line down and re-indent
@@ -51,8 +66,6 @@ local directional_modes = { "n", "v", "o" }
 	end
 	vim.keymap.set("n","ge",":bn<CR>")
 	vim.keymap.set("n","gE",":bp<CR>")
-	vim.keymap.set("n","s","<C-o><CR>")
-	vim.keymap.set("n","S","<C-O><CR>")
 
 	local toggle = require("functions/headerview")
 	vim.keymap.set("n", "<M-h>", toggle.organize_cpp_split)
