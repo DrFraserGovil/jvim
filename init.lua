@@ -1,3 +1,9 @@
+if vim.g.neovide then
+vim.g.neovide_ext_cmdline = false
+vim.g.neovide_ext_messages = false
+vim.g.encoding="utf-8"
+vim.g.fileencoding="utf-8"
+end
 vim.g.mapleader = " "
 
 
@@ -25,9 +31,6 @@ require("lazy").setup({
 if vim.g.vscode then
 	require("vscode-hooks")
 end
-
-
-
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "qf",
     callback = function()

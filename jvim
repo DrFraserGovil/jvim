@@ -62,6 +62,7 @@ find_project_root() {
 
 SEND_SIGNAL=true
 if [ ! -S "$SOCK" ]; then
+	
 	if [ "$ROOT_SPECIFIED" = true ]; then
 		cd_target="$ROOT_OVERRIDE"
 	elif [ ${#args[@]} -gt 0 ]; then
@@ -77,7 +78,7 @@ if [ ! -S "$SOCK" ]; then
 	fi
 
 	if [ "$USING_NEOVIDE" = true ]; then
-		nohup neovide.exe --wsl -- --cmd "cd $cd_target" \
+		nohup neovide --no-startup-message-capture -- --cmd "cd $cd_target" \
 			--cmd "let &titlestring = 'NV $SOCKET - %f'" \
 			--cmd "set title" \
 			 -c "if filereadable('.jvim.session') | source .jvim.session | endif" \

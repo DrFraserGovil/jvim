@@ -17,7 +17,9 @@ end, { expr = true, remap = true, silent = true })
 vim.keymap.set({ "n", "x" }, "k", function()
     return vim.v.count > 0 and "k" or "gk"
 end, { expr = true, remap = true, silent = true })
- 
+
+-- Send 'x' to the black hole, we rarely want to yank it!
+vim.keymap.set('n', 'x', '"_x', { noremap = true, silent = true })
 -- Reassign unused or duplicated keys to more useful things 
 vim.keymap.set(directional_modes, "£", "#")
 vim.keymap.set(directional_modes, "\\", "$")

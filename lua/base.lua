@@ -4,7 +4,6 @@ require("functions/localopen")  -- open files relative to the current file
 require("functions/safeedit")	-- opens a buffer after moving to a non-terminal window
 require("functions/todo")	-- streamline dinterface for todo
 require("functions/definesource")	
-require("functions/sessions")
 require("functions/moveline")
 require("functions/harpoontabs")
 require("functions/harpoon")

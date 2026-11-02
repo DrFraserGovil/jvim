@@ -99,7 +99,7 @@ return {
 						auxDirectory = ".build",
 						build = {
 							executable = 'jfglatex',
-							args = { '%f' },
+							args = { '-d','-x','%f' },
 							onSave = true,
 							forwardSearchAfter = false,
 						},
@@ -111,15 +111,30 @@ return {
 						latexFormatter = 'latexindent',
 						formatterLineLength = 80,
 						experimental = {
-								mathEnvironments = {"spalign"},
+							mathEnvironments = { "spalign" },
 						},
 					},
 				},
 			})
 			vim.lsp.enable('texlab')
-
-			-- Python
-			vim.lsp.enable('pyright')
+			-- python / basedpyright
+			vim.lsp.config('basedpyright', {
+				settings = {
+					basedpyright = {
+						analysis = {
+							typeCheckingMode = "basic", -- drops default mode from 'all'/'recommended' down to sensible defaults
+							-- per-rule overrides must live in diagnosticSeverityOverrides (keys are case-sensitive)
+							diagnosticSeverityOverrides = {
+								reportUnknownMemberType = "none",
+								reportUnknownVariableType = "none",
+								reportUnknownArgumentType = "none",
+								reportUnknownLambdaType = "none",
+							},
+						},
+					},
+				},
+			})
+			vim.lsp.enable('basedpyright')
 			-- Sphinx/rst
 			vim.lsp.config('esbonio', {
 				cmd = { vim.fn.stdpath('data') .. "/mason/bin/esbonio", "server" },
@@ -128,7 +143,7 @@ return {
 				settings = {
 					esbonio = {
 						sphinx = {
-							pythonCommand = { "/home/jfg/pysphere/bin/python3" },
+							pythonCommand = { vim.fn.expand("~/pysphere/bin/python3") },
 							buildCommand = { "sphinx-build", "-M", "html", ".", "_build" },
 						}
 					}

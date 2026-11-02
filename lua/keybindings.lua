@@ -36,6 +36,7 @@ local directional_modes = { "n", "v", "o" }
 	vim.keymap.set("n", "<leader>y", ":%y<CR>")
 	vim.keymap.set("n", "<leader>a", "ggVG")
 	vim.keymap.set("n", "<leader>n", ":noh<CR>") 
+	vim.keymap.set("n", "<leader>d", ":Bd<CR>") 
 	vim.keymap.set("n", "<leader>=", function() vim.lsp.buf.format({async=true}) end) --triggers a global reformat
 
 	local toggle = require("functions/togglewrap")
@@ -50,12 +51,14 @@ local directional_modes = { "n", "v", "o" }
 	end
 	vim.keymap.set("n","ge",":bn<CR>")
 	vim.keymap.set("n","gE",":bp<CR>")
+	vim.keymap.set("n","s","<C-o><CR>")
+	vim.keymap.set("n","S","<C-O><CR>")
 
 	local toggle = require("functions/headerview")
 	vim.keymap.set("n", "<M-h>", toggle.organize_cpp_split)
 
 	vim.keymap.set("n","<c-\\>",":vs<cr>:bp<cr><c-w>l",{desc= "Split window vertically without duplicating the buffer"})
-
+	vim.keymap.set("n","<M-O>",":AutoSession search<CR>")
 
 --Comments & folding
 	vim.keymap.set("i","<C-/>","<Esc>gcc]",{remap=true})
@@ -96,7 +99,7 @@ local directional_modes = { "n", "v", "o" }
 -- Harpoon
 	local harpoonCustom = require("functions/harpoon")
 	vim.keymap.set("n","<M-a>",harpoonCustom.toggle_add, {desc= "Toggle the buffer into the harpoon list"}) 
-	vim.keymap.set("n", "<M-l>", function() require("harpoon").ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon: Toggle menu" })
+	vim.keymap.set("n", "<M-l>", function() local harpoon = require("harpoon"); harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "Harpoon: Toggle menu" })
 	vim.keymap.set("n", "<M-1>", function() harpoonCustom.smart_select(1) end)
 	vim.keymap.set("n", "<M-2>", function() harpoonCustom.smart_select(2) end)
 	vim.keymap.set("n", "<M-3>", function() harpoonCustom.smart_select(3) end)
